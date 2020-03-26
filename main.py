@@ -18,7 +18,10 @@ drag = 0.999
 gravity_angle, gravity_distance = math.pi, 0.002
 
 # DISPLAY/COLOURS
-WIDTH, HEIGHT = 640, 480
+# set screen position
+x, y = 1920 // 4, 1080 // 4
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x, y)
+WIDTH, HEIGHT = 768, 432
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Master Blaster")
 WHITE = (255, 255, 255)
@@ -34,7 +37,6 @@ BODY_ITALIC_FONT = pygame.font.Font(os.path.normpath("font/Body italic.ttf"), 20
 TABLE_FONT = pygame.font.Font(os.path.normpath("font/Body font.ttf"), 13)
 TABLE_ITALIC_FONT = pygame.font.Font(os.path.normpath("font/Body italic.ttf"), 13)
 HUD_FONT = pygame.font.SysFont("monospace", 15)
-
 
 # SOUND FX
 SFX_VOLUME = 1
@@ -756,6 +758,7 @@ class Gun():
     def __init__(self, game_play_scene):
 
         self.ammo = math.inf
+        self.fire_mode = 'semi'
         self.user = game_play_scene
         self.primary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Gun Primary Fire Sound.ogg"))
         self.secondary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Gun Secondary Fire Sound.ogg"))
@@ -777,6 +780,7 @@ class RocketLauncher():
     def __init__(self, game_play_scene):
 
         self.ammo = 100
+        self.fire_mode = 'semi'
         self.user = game_play_scene
         self.primary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Rocket Launcher Primary Fire Sound.ogg"))
         self.secondary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Rocket Launcher Secondary Fire Sound.ogg"))
@@ -798,6 +802,7 @@ class BombLauncher():
     def __init__(self, game_play_scene):
 
         self.ammo = 100
+        self.fire_mode = 'semi'
         self.user = game_play_scene
         self.primary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Bomb Launcher Primary Fire Sound.ogg"))
         self.secondary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Bomb Launcher Secondary Fire Sound.ogg"))
@@ -819,6 +824,7 @@ class LaserGun():
     def __init__(self, game_play_scene):
 
         self.ammo = 100
+        self.fire_mode = 'semi'
         self.user = game_play_scene
         self.primary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Laser Gun Primary Fire Sound.ogg"))
         self.secondary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Laser Gun Secondary Fire Sound.ogg"))
@@ -840,6 +846,7 @@ class LightningGun():
     def __init__(self, game_play_scene):
 
         self.ammo = 1000
+        self.fire_mode = 'auto'
         self.game_play_scene = game_play_scene
         self.primary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Lightning Gun Primary Fire Sound.ogg"))
         self.secondary_fire_sound = pygame.mixer.Sound(os.path.normpath("sound/Lightning Gun Secondary Fire Sound.ogg"))
@@ -2578,7 +2585,7 @@ class GameOverScene(Scene):
     
     def on_update(self):
         if self.music_flag:
-            pygame.mixer.music.load("game over.wav")
+            pygame.mixer.music.load(os.path.normpath("sound/game over.wav"))
             pygame.mixer.music.set_volume(0.5)
             pygame.mixer.music.play(0)
             self.music_flag = False
@@ -2650,9 +2657,10 @@ class IntroCutScene(Scene):
         self.stars = []
 
         for particle in main_menu_scene.particles:
-            self.particles.append(particle)  
-        for star in main_menu_scene.stars:
-            self.stars.append(star)     
+            self.particles.append(particle)
+
+        self.starts = main_menu_scene.stars
+   
         self.defender = Defender(WIDTH *0.5, HEIGHT - 50)
         self.initial_time = pygame.time.get_ticks()
         self.movement_x = [False, False]
@@ -2675,7 +2683,6 @@ class IntroCutScene(Scene):
         self.movement_flag_12 = True
 
     def on_event(self, event, mpos1, mpos2):
-
         pass
         
     def on_update(self):
@@ -2862,7 +2869,6 @@ class GamePlayScene(Scene):
         self.primary_fire = False
         self.secondary_fire = False
 
-
         # rendered texts
         self.display_score = HUD_FONT.render(str(self.score), 1, WHITE)
         self.selected_weapon_text = HUD_FONT.render("Weapon:" + self.current_weapon.text, 1, WHITE)
@@ -2874,9 +2880,15 @@ class GamePlayScene(Scene):
                 empty_weapon_sound = pygame.mixer.Sound(os.path.normpath("sound/Empty Weapon Sound 1.ogg"))
                 empty_weapon_sound.play(0)
             if (event.key == pygame.K_RETURN) and (self.current_weapon.ammo > 0):
-                self.primary_fire = True
+                if self.current_weapon.fire_mode == 'semi':
+                    self.current_weapon.primary_fire()
+                elif self.current_weapon.fire_mode == 'auto':
+                    self.primary_fire = True
             if (event.key == pygame.K_SPACE) and (self.current_weapon.ammo > 0):
-                self.secondary_fire = True
+                if self.current_weapon.fire_mode == 'semi':
+                    self.current_weapon.secondary_fire()
+                elif self.current_weapon.fire_mode == 'auto':
+                    self.secondary_fire = True
             if (event.key == pygame.K_RIGHT) and (self.weapon_toggle == len(self.weapon_inventory) - 1):
                 self.weapon_toggle = 0
                 self.current_weapon.primary_fire_sound.stop()
@@ -2928,11 +2940,12 @@ class GamePlayScene(Scene):
 
         if self.current_weapon.ammo < 0:
             self.current_weapon.ammo = 0
-
-        if self.primary_fire:
-            self.current_weapon.primary_fire()
-        if self.secondary_fire:
-            self.current_weapon.secondary_fire()
+        
+        if self.current_weapon.fire_mode == 'auto':
+            if self.primary_fire:
+                self.current_weapon.primary_fire()
+            if self.secondary_fire:
+                self.current_weapon.secondary_fire()
             
         if self.movement_x[0]: 
             self.defender.x += -4.333
@@ -3070,6 +3083,8 @@ class GamePlayScene(Scene):
             projectile.display()
         for enemy in self.enemies:
             enemy.display()
+        for star in self.stars:
+            star.display()
         for notification in self.notifications:
             notification.display()
 
