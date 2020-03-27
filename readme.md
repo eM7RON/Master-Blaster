@@ -33,7 +33,7 @@ pygame
     <img src="https://github.com/eM7RON/Master-Blaster/blob/master/img/main_menu.PNG" alt="main menu" width="700"/>
 </p>
 
-### In Game Graphics
+### In-Game Graphics
 
 <p align="center">
     <img src="https://github.com/eM7RON/Master-Blaster/blob/master/img/ingame.PNG" alt="ingame" width="700"/>
