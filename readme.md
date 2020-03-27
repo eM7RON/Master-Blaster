@@ -48,7 +48,7 @@ pygame
 ### Lightning Effects
 
 <p align="center">
-    <img src="https://github.com/eM7RON/Master-Blaster/blob/master/img/lightning.PNG" alt="lightning" width="500"/>
+    <img src="https://github.com/eM7RON/Master-Blaster/blob/master/img/lightning.PNG" alt="lightning" width="480"/>
 </p>
 
 ## Authors
