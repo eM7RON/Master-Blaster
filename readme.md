@@ -2,7 +2,7 @@
 
 One of the first, non-'hellow world', things I ever coded; a Space Invaders type game programmed in Python. For this I used a library called Pygame.
 
-It was a good way to learn some basic User Interface stuff e.g. how to handle navigating through different windows etc...
+It was a good way to learn some basic user interface stuff e.g. how to handle navigating through different windows etc...
 
 The game features a heads up display of sorts, whereby the player's lives, ammo and score are display in the corners. It features various 'particle effects' such as explosions, sparks and after burners. I am particularly proud of the lightning effects :) 
 
