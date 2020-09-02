@@ -1,6 +1,6 @@
 # Master-Blaster
 
-One of the first, non-'hellow world', things I ever coded; a Space Invaders type game programmed in Python. For this I used a library called Pygame.
+One of the first, non-'hello world', things I ever coded; a Space Invaders type game programmed in Python. For this I used a library called Pygame.
 
 It was a good way to learn some basic user interface stuff e.g. how to handle navigating through different windows etc...
 
